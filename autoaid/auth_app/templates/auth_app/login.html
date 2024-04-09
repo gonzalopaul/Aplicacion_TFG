@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>AutoAID</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  {% load static %}
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'css/style_login.css' %}">
+</head>
+<body>
+<div id="stars"></div>
+<div id="stars2"></div>
+<div id="stars3"></div>
+<div class="section">
+  <div class="container">
+    <div class="row full-height justify-content-center">
+        <img src="{% static 'images/logo_png.png' %}" alt="Logo" class="centered-logo" style="height: 150px; position: absolute;">
+      <div class="col-12 text-center align-self-center py-5">
+        <div class="section pb-5 pt-5 pt-sm-2 text-center">
+          <h6 class="mb-0 pb-3"><span>Log In </span><span>Sign Up</span></h6>
+                <input class="checkbox" type="checkbox" id="reg-log" name="reg-log"/>
+                <label for="reg-log"></label>
+          <div class="card-3d-wrap mx-auto">
+            <div class="card-3d-wrapper">
+              <div class="card-front">
+                <div class="center-wrap">
+                  <div class="section text-center">
+                    <h4 class="mb-4 pb-3">Log In</h4>
+                    <form method="post" action="{% url 'login_and_register' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="login">
+                        <div class="form-group">
+                            {{ login_form.as_p }}
+                        </div>	
+                        <button type="submit" name="login" class="btn mt-4">Login</button>
+                        <p class="mb-0 mt-4 text-center"><a href="{% url 'login' %}" class="link">Forgot your password?</a></p>
+                    </form>
+                    </div>
+                  </div>
+              </div>
+              <div class="card-back">
+                <div class="center-wrap" style="font-size: 10px;">
+                  <div class="section text-center">
+                    <h4 class="mb-3 pb-3">Sign Up</h4>
+                    <form method="post" action="{% url 'login_and_register' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="login">
+                        <div class="form-group" style="font-size: 6px;">
+                            {{ register_form.as_p }}
+                        </div>
+                        
+                        <button type="submit" name="register" class="btn mt-4">Sign up</button>
+                        <p class="mb-0 mt-4 text-center"><a href="{% url 'login' %}" class="link">Go to login</a></p>
+                    </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        /* Agrega aquí tus estilos CSS */
+    </style>
+</head>
+<body>
+    <h2>Login</h2>
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Login</button>
+    </form>
+    <p>¿No tienes una cuenta? <a href="{% url 'register' %}">Regístrate</a></p>
+</body>
+</html> -->
+
+
+
+<!-- <div class="form-group mt-2">
+    <label>Email:</label>
+    {{ register_form.email }}
+  <i class="input-icon uil uil-at"></i>
+</div>	
+<div class="form-group mt-2">
+    <label>Password:</label>
+    {{ register_form.password1 }}
+  <i class="input-icon uil uil-lock-alt"></i>
+</div>		
+<div class="form-group mt-2">
+    <label for="id_email">Repeat Pass:</label>
+    {{ register_form.password2 }}
+  <i class="input-icon uil uil-lock-alt"></i>
+</div>	 -->

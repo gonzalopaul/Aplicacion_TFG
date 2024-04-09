@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts -->
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Remixicon Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Remixicon Icon -->
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+
+    <!-- Main CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+
+		<title>Car</title>
+    {% load static %}
+
+		<link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/form.css' %}">
+
+    <script src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      { 
+        "imports": {
+          "three": "https://unpkg.com/three@v0.153.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@v0.153.0/examples/jsm/"
+        }
+      }
+    </script>
+	</head>
+	<body>
+    <!-- header -->
+    <header class="ds-header ds-header-home">
+      <div class="container">
+          <div class="ds-header-inner">
+            <a href="index.html" class="ds-logo">autoAID<span>.</span></a>
+            <p>¡Bienvenido, {{ user.nombre }} !  <a href="{% url 'logout' %}" style="color: red; font-size: small;">Cerrar sesión</a></p>
+          </div>
+      </div>
+      <!-- Botones basados en el rol de usuario -->
+    <div class="container mt-4">
+        {% if user.rol == 'worker' %}
+            <!-- Botón para workers -->
+        <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+        {% endif %}
+
+        {% if user.rol == 'usuario' %}
+            <!-- Botón para usuarios -->
+        <a href="{% url 'home' %}" class="btn btn-success">Home</a>
+        <a href="{% url 'vehicle_visualization:mis_incidencias' %}" class="btn btn-primary">Mis incidencias</a>
+
+        {% endif %}
+
+        {% if user.is_superuser %}
+            <!-- Botón para superusuarios -->
+        <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
+            <!-- Superuser también puede ver el dashboard -->
+        <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+        {% endif %}
+</div>
+  </header>
+    <div id="progress-container">
+      <div id="progress">Cargando 0/100</div>
+    </div>
+    <div class="forms">
+      <h3>Turismo</h3>
+      <h5>Toca en las diferentes partes del vehículo e indica el nivel de daños </h5>
+
+      <form method="post" action="{% url 'vehicle_visualization:car_view' %}" enctype="multipart/form-data" style="position: absolute; max-width:min-content;">
+        {% csrf_token %}
+        <div class="form-container" style="text-size-adjust: 3;">
+          <div class="left-form-fields">
+            
+            <div class="input-container ic1">
+              <input class="input" type="email" name="email" required placeholder="Email del cliente" required>
+            </div>
+          
+
+            <div class="input-container ic2" id="popupDamage_capo" style="display: none;">
+              <h5>Daño capo</h5>
+              <input class="input" type="range" name="nivel_dano_capo" min="0" max="5" value="0" >
+              <input type="file" name="imagen_capo" placeholder="Imagen" style="font-size: 10px;">
+              <div class="cut"></div>
+            </div>
+
+            <div class="input-container ic2" id="popupDamage_paragolpes" style="display: none;">
+              <h5>Daño paragolpes</h5>
+              <input class="input" type="range" name="nivel_dano_paragolpes" min="0" max="5" value="0">
+              <input type="file" name="imagen_paragolpes" placeholder="Imagen" style="font-size: 10px;">
+              <div class="cut"></div>
+            </div>
+
+            <div class="input-container ic2" id="popupDamage_lateral_izq" style="display: none;">
+              <h5>Daño lateral izquierdo</h5>
+              <input class="input" type="range" name="nivel_dano_lateral_izq" min="0" max="5" value="0">
+              <input type="file" name="imagen_lateral_izq" placeholder="Imagen" style="font-size: 10px;">
+              <div class="cut"></div>
+            </div>
+
+            <div class="input-container ic2" id="popupDamage_lateral_der" style="display: none;">
+              <h5>Daño lateral derecho</h5>
+              <input class="input" type="range" name="nivel_dano_lateral_der" min="0" max="5" value="0">
+              <input type="file" name="imagen_lateral_der" placeholder="Imagen" style="font-size: 10px;">
+              <div class="cut"></div>
+            </div>
+
+            <div class="input-container ic2" id="popupDamage_techo" style="display: none;">
+              <h5>Daño techo</h5>
+              <input class="input" type="range" name="nivel_dano_techo" min="0" max="5" value="0">
+              <input type="file" name="imagen_techo" placeholder="Imagen" style="font-size: 10px;">
+              <div class="cut"></div>
+            </div>
+
+            <div class="input-container ic2" id="popupDamage_atras" style="display: none;">
+              <h5>Daño atrás</h5>
+              <input class="input" type="range" name="nivel_dano_atras" min="0" max="5" value="0">
+              <input type="file" name="imagen_atras" placeholder="Imagen" style="font-size: 10px;">
+              <div class="cut"></div>
+            </div>
+
+            <div class="input-container ic2">
+              <h5>Información relevante</h5>
+              <input class="input" type="text" name="descripcion" placeholder="Tipo de accidente, causante ...">
+              <div class="cut"></div>
+            </div>
+          </div>
+
+
+          <div class="right-form-fields">
+            <!-- Fecha y hora del siniestro -->
+            <div class="input-container">
+                <input class="input" type="datetime-local" name="fecha_hora_siniestro" required placeholder="Fecha y hora del siniestro">
+            </div>
+        
+            <!-- Ubicación exacta del siniestro -->
+            <div class="input-container">
+                <input class="input" type="text" name="ubicacion_siniestro" required placeholder="Ubicación exacta del siniestro">
+            </div>
+        
+            <!-- Tipo de aparcamiento -->
+            <div class="input-container">
+                <select class="input" name="tipo_aparcamiento">
+                    <option value="">Tipo de Aparcamiento</option>
+                    <option value="si">Sí</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+        
+            <!-- Matrícula del vehículo -->
+            <div class="input-container">
+                <input class="input" type="text" name="matricula" required placeholder="Matrícula">
+            </div>
+        
+            <!-- Marca y modelo del vehículo -->
+            <div class="input-container">
+                <input class="input" type="text" name="marca_modelo" required placeholder="Marca y Modelo">
+            </div>
+        
+            <!-- Nombre y apellidos del asegurado -->
+            <div class="input-container">
+                <input class="input" type="text" name="nombre_asegurado" required placeholder="Nombre y Apellidos">
+            </div>
+        
+            <!-- Teléfono móvil -->
+            <div class="input-container">
+                <input class="input" type="tel" name="telefono_movil" required placeholder="Teléfono móvil">
+            </div>
+        
+            <!-- Vehículos o propiedades involucradas -->
+            <div class="input-container">
+                <input class="input" type="text" name="vehiculos_propiedades_involucrados" placeholder="Vehículos o propiedades involucradas">
+            </div>
+        
+            <!-- Testigo y contacto -->
+            <div class="input-container">
+                <input class="input" type="text" name="testigo" placeholder="Testigo (nombre)">
+            </div>
+
+            <!-- Testigo y contacto -->
+            <div class="input-container">
+              <input class="input" type="text" name="contacto_testigo" placeholder="Contacto testigo">
+            </div>
+                  
+        
+            <!-- Llamada a la policía -->
+            <div class="input-container">
+                <select class="input" name="llamada_policia">
+                    <option value="">¿Se llamó a la policía?</option>
+                    <option value="si">Sí</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <!-- Numero incidencia policial --> 
+            <div class="input-container">
+              <input class="input" type="text" name="numero_incidencia_policial" placeholder="Nº Incidencia">
+            </div>
+
+          </div>
+       </div>
+       <input class="input" type="submit" value="Reportar daños">
+     </form>
+    </div>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    </div>
+
+  
+        {% load static %}
+        <script type="text/javascript">
+            // Define la ruta estática como una variable global en JavaScript
+            var staticModelUrl = "{% static 'models/car/scene.gltf' %}";
+          </script>
+        <script type="module" src="{% static 'js/3d2.js' %}"></script>
+	</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Coche </title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    </head>
+
+    <body>
+        <header>
+            <h1>UNO SIMPLÓN</h1>
+        </header>
+
+        <main>
+            <div id="container3D"></div>
+        </main>
+
+        <script src="three.min.js"></script>
+        <script>
+            let scene, camera, renderer;
+
+            function init(){
+
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0xdddddd);
+
+                camera = new THREE.PerspectiveCamera(40,window.innerWidth/window.innerHeight,1,5000);
+
+                hlight = new THREE.AmbientLight (0x404040,100);
+                scene.add(hlight);
+
+                renderer = new THREE.WebGLRenderer({antialias:true});
+                renderer.setSize(window.innerWidth,windo.innerHeight);
+                document.body.appendChild(renderer.docElement);
+            }
+        </script>
+    </body>
+</html> -->

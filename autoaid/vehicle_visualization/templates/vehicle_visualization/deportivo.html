@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Deportivo</title>
+        {% load static %}
+
+		<link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+    <script src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@v0.153.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@v0.153.0/examples/jsm/"
+        }
+      }
+    </script>
+
+    <style>
+      html, body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden; /* Evita el desplazamiento */
+          height: 100%;
+          width: 100%;
+      }
+      canvas {
+          display: block; /* Elimina cualquier margen por defecto */
+      }
+  </style>
+	</head>
+	<body>
+    <div id="heading">
+      <h1>Auto AID [DEPORTIVO]</h1>
+      <div class="border"></div>
+    </div>
+    <div id="progress-container">
+      <div id="progress">Cargando 0/100</div>
+    </div>
+        {% load static %}
+        <script type="text/javascript">
+            // Define la ruta estática como una variable global en JavaScript
+            var staticModelUrl = "{% static 'models/deportivo3/scene.gltf' %}";
+          </script>
+        <script type="module" src="{% static 'js/3d2.js' %}"></script>
+	</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Coche </title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    </head>
+
+    <body>
+        <header>
+            <h1>UNO SIMPLÓN</h1>
+        </header>
+
+        <main>
+            <div id="container3D"></div>
+        </main>
+
+        <script src="three.min.js"></script>
+        <script>
+            let scene, camera, renderer;
+
+            function init(){
+
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0xdddddd);
+
+                camera = new THREE.PerspectiveCamera(40,window.innerWidth/window.innerHeight,1,5000);
+
+                hlight = new THREE.AmbientLight (0x404040,100);
+                scene.add(hlight);
+
+                renderer = new THREE.WebGLRenderer({antialias:true});
+                renderer.setSize(window.innerWidth,windo.innerHeight);
+                document.body.appendChild(renderer.docElement);
+            }
+        </script>
+    </body>
+</html> -->
