@@ -11,6 +11,18 @@ ESTADO_CHOICES = (
     ('en_revision', 'En revisión'),
     ('cerrado', 'Cerrado'),
 )
+ESTADOS_INVESTIGACION = [
+    ('pendiente', 'Pendiente'),
+    ('en_progreso', 'En Progreso'),
+    ('datos_insuficientes', 'Datos Insuficientes'),
+    ('en_espera_de_documentacion', 'En Espera de Documentación'),
+    ('fraude_confirmado', 'Fraude Confirmado'),
+    ('sin_fraude', 'Sin Fraude'),
+    ('fraude_sospechoso', 'Fraude Sospechoso'),
+    ('archivado', 'Archivado'),
+    ('revision_externa', 'Revisión Externa'),
+    ('en_litigio', 'En Litigio'),
+]
 class Incidencia(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     email = models.CharField(max_length=30, verbose_name='email', null=True)
@@ -58,7 +70,27 @@ class Incidencia(models.Model):
         default='pendiente',
         verbose_name='Estado'
     )
-    
+
+class HistorialIncidencia(models.Model):
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    email = models.CharField(max_length=30, verbose_name='email', null=True)
+    descripcion = models.TextField()
+    fecha_hora_siniestro = models.DateTimeField(verbose_name='Fecha y hora del siniestro', null=True)
+    ubicacion_siniestro = models.CharField(max_length=255, verbose_name='Ubicación del siniestro', null=True)
+
+    tipo_aparcamiento = models.CharField(
+        max_length=2,
+        choices=TIPO_APARCAMIENTO_CHOICES,
+        verbose_name='Tipo de Aparcamiento',
+        default="no"
+    )
+    matricula = models.CharField(max_length=20, verbose_name='Matrícula', null=True)
+    marca_modelo = models.CharField(max_length=50, verbose_name='Marca y Modelo', null=True)
+    nombre_asegurado = models.CharField(max_length=100, verbose_name='Nombre y Apellidos del asegurado', null=True)
+    telefono_movil = models.CharField(max_length=20, verbose_name='Teléfono móvil', null=True)
+    vehiculos_propiedades_involucrados = models.TextField(verbose_name='Vehículos o propiedades involucrados', null=True, blank=True)
+    testigo = models.CharField(max_length=100, verbose_name='Testigo', null=True, blank=True)
+    contacto_testigo = models.CharField(max_length=100, verbose_name='Contacto del testigo', null=True, blank=True)
 
 class Poliza(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Usuario")
@@ -66,15 +98,25 @@ class Poliza(models.Model):
     fecha_inicio = models.DateField(verbose_name="Fecha de Inicio")
     fecha_fin = models.DateField(verbose_name="Fecha de Fin")
     condiciones = models.TextField(verbose_name="Condiciones de la Póliza", blank=True, null=True)
+    edad_conductor = models.IntegerField(verbose_name="Edad del Conductor")
+    anos_carnet = models.IntegerField(verbose_name="Años de Carnet")
+    puntos_carnet = models.IntegerField(verbose_name="Puntos del Carnet")
+    importe_poliza = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Importe de la Póliza")
+
 
     def __str__(self):
         return f"{self.tipo_poliza} - {self.usuario.email}"
 
 class HistorialFraudes(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Usuario")
-    fecha_incidente = models.DateField(verbose_name="Fecha del Incidente")
-    descripcion = models.TextField(verbose_name="Descripción del Fraude")
-    estado_investigacion = models.CharField(max_length=100, verbose_name="Estado de la Investigación", default="En proceso")
+    fecha_incidente = models.DateField(verbose_name="Fecha del Incidente", blank=True, null= True)
+    descripcion = models.TextField(verbose_name="Descripción del Fraude", blank=True, null=True)
+    estado_investigacion = models.CharField(
+    max_length=50,
+    choices=ESTADOS_INVESTIGACION,
+    default='pendiente',
+    verbose_name="Estado de la Investigación"
+)
 
     def __str__(self):
         return f"Fraude - {self.fecha_incidente} - {self.usuario.email}"

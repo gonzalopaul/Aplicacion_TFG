@@ -1,0 +1,96 @@
+package com.autoaid.drools.rules;
+
+import com.autoaid.drools.Siniestro;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
+global java.util.List respuestas;
+global java.util.List recomendaciones;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+rule "Identificar tipo de aparcamiento"
+when
+    siniestro: Siniestro(tipoAparcamiento == "no")
+then
+    respuestas.add("Siniestro de no aparcamiento detectado: " + siniestro.getUbicacion());
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+rule "Identificar matricula de tipo aparcamiento"
+when
+    siniestro: Siniestro(tipoAparcamiento == "no")
+then
+    respuestas.add("Matricula del vehiculo: " + siniestro.getMatricula());
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+rule "Necesita aclaracion"
+when
+    siniestro: Siniestro(testigo != null)
+then
+    recomendaciones.add("Contactar con testigo " + siniestro.getTestigo() + " al " + siniestro.getContactoTestigo());
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Regla para identificar reclamaciones frecuentes por un asegurado
+rule "Reclamaciones frecuentes"
+when
+    siniestro: Siniestro(reincidenciaUltimoAnno > 2)
+then
+    respuestas.add("Alerta: Reclamaciones frecuentes en un corto período de tiempo.");
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Regla para verificar si hubo llamada a la policía en siniestros con daños significativos
+rule "Llamada a policia en siniestros graves"
+when
+    siniestro: Siniestro(llamadaPolicia == false, vehiculosPropiedadesInvolucrados == true)
+then
+    respuestas.add("Verificar: No se reportó llamada a la policía en un siniestro con daños significativos.");
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Regla para detectar fraudes basados en el número de reincidencias
+rule "Fraude por reincidencia"
+when
+    siniestro: Siniestro(reincidencia3Anno >= 3)
+then
+    respuestas.add("Alerta de fraude: Reincidencia elevada en los últimos tres años.");
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Regla para detectar discrepancias entre el daño reportado y la ausencia de testigos o reporte policial
+rule "Discrepancias en reporte de daño"
+when
+    siniestro : Siniestro( vehiculosPropiedadesInvolucrados == true, testigo == null, llamadaPolicia == false )
+then
+    respuestas.add("Revisión necesaria: Daño significativo reportado sin testigos o reporte policial.");
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Regla para identificar siniestros frecuentes en el mismo vehículo
+rule "Siniestros frecuentes en el mismo vehículo"
+when
+    siniestro : Siniestro( reincidenciaUltimoAnno >= 2 )
+then
+    respuestas.add("Revisión de vehículo: Múltiples siniestros reportados para el mismo vehículo.");
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Regla para priorizar siniestros con heridos
+rule "Priorizar siniestros con heridos"
+when
+    siniestro: Siniestro(vehiculosPropiedadesInvolucrados == true)
+then
+    respuestas.add("Priorizar este siniestro debido a la posible presencia de heridos.");
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Regla para sugerir revisión rápida si no hay vehículos o propiedades involucradas
+rule "Revisión rápida para siniestros menores"
+when
+    siniestro: Siniestro(vehiculosPropiedadesInvolucrados == false)
+then
+    respuestas.add("Sugerir revision rapida del caso al no haber vehiculos o propiedades involucradas.");
+end
+

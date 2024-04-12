@@ -48,14 +48,15 @@
       <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
           <!-- Superuser también puede ver el dashboard -->
       <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+      <a href="{% url 'historial_usuario' %}" class="btn btn-primary" style="background-color: orange; border-color: orange;">Historial Usuarios</a>
       <a href="{% url 'home' %}" class="btn btn-success">Home</a>
       {% endif %}
 </div>
 
 </header>
 <!-- header -->
-<h3 style="margin-left: 150; margin-top: 50;">Centro de control de roles</h3>
-<div style="display: flex; margin-left: 150; margin-top: 50;">
+<h3 style="margin-left: 150; margin-top: 10;">Centro de control de roles</h3>
+<div style="display: flex; margin-left: 150; margin-top: 50">
 <form method="post">
     {% csrf_token %}
     {{ form.user.label_tag }}: {{ form.user }}
@@ -63,3 +64,61 @@
     <button type="submit">Actualizar Rol</button>
 </form>
 </div>
+<div class="container mt-5" style="margin-bottom: 50;">
+    <h3>Usuarios</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Rol</th>
+                <th>Last Login</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            {% if user.rol == "worker" or user.rol == "usuario" %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.nombre }}</td>
+                <td>{{ user.apellidos }}</td>
+                <td>{{ user.rol }}</td>
+                <td>{{ user.last_login }}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+  <br>
+    <h3>Usuarios pendientes de verificación</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Rol</th>
+                <th>Last Login</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            {% if user.rol == "" %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.nombre }}</td>
+                <td>{{ user.apellidos }}</td>
+                <td>{{ user.rol }}</td>
+                <td>{{ user.last_login }}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+  

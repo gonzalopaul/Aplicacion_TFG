@@ -39,6 +39,7 @@
             {% if user.rol == 'worker' %}
                 <!-- Botón para workers -->
             <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+            <a href="{% url 'historial-usuarios' %}" class="btn btn-primary">Historial Usuarios</a>
             {% endif %}
 
             {% if user.rol == 'usuario' %}
@@ -53,6 +54,7 @@
             <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
                 <!-- Superuser también puede ver el dashboard -->
             <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+            <a href="{% url 'historial_usuario' %}" class="btn btn-primary" style="background-color: orange; border-color: orange;">Historial Usuarios</a>
             {% endif %}
     </div>
       </header>

@@ -1,0 +1,144 @@
+<!-- auth_app/templates/auth_app/historial_usuario.html -->
+
+{% block content %}
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <!-- Google Fonts -->
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+      <!-- Remixicon Icon -->
+      <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+      <!-- Remixicon Icon -->
+      <!-- Bootstrap CSS -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+      <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+      <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+
+      <!-- Main CSS -->
+      {% load static %}
+      <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+
+    <title>Manage Users</title>
+  </head>
+<!-- header -->
+<header class="ds-header ds-header-home">
+    <div class="container">
+        <div class="ds-header-inner">
+          <a href="index.html" class="ds-logo">autoAID<span>.</span></a>
+          <p>¡Bienvenido, {{ user.nombre }} !  <a href="{% url 'logout' %}" style="color: red; font-size: small;">Cerrar sesión</a></p>
+        </div>
+    </div>
+    <!-- Botones basados en el rol de usuario -->
+  <div class="container mt-4">
+    
+      {% if user.rol == 'worker' %}
+          <!-- Botón para workers -->
+      <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+      {% endif %}
+
+      {% if user.rol == 'usuario' %}
+          <!-- Botón para usuarios -->
+      <a href="{% url 'vehicle_visualization:car' %}" class="btn btn-primary">Incidencia</a>
+      {% endif %}
+
+      {% if user.is_superuser %}
+          <!-- Botón para superusuarios -->
+      <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
+          <!-- Superuser también puede ver el dashboard -->
+      <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+      <a href="{% url 'historial_usuario' %}" class="btn btn-primary" style="background-color: orange; border-color: orange;">Historial Usuarios</a>
+      <a href="{% url 'home' %}" class="btn btn-success">Home</a>
+      {% endif %}
+</div>
+
+</header>
+<div class="container">
+    <h2>Historial de Usuarios</h2>
+    <form method="get" action="">
+        {{ usuario_form.as_p }}
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <br>
+
+    <h3>Historial de Incidencias</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Ubicación</th>
+                <th>Marca y modelo</th>
+                <th>Matricula</th>
+                <th>Detalles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in historial_incidencias %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.fecha_hora_siniestro }}</td>
+                <td>{{ item.ubicacion_siniestro }}</td>
+                <td>{{ item.marca_modelo }}</td>
+                <td>{{ item.matricula }}</td>
+                <td>{{ item.descripcion }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Historial de Fraudes</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Detalle</th>
+                <th>Estado investigacion</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in historial_fraudes %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.fecha_incidente }}</td>
+                <td>{{ item.descripcion }}</td>
+                <td>{{ item.estado_investigacion }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ usuario_form.as_p }}
+        <button type="submit" name="submit_usuario" class="btn btn-primary">Filtrar Usuario</button>
+    </form> -->
+    
+    <!-- Formulario de carga para incidencias -->
+    <div style="margin-top: 100; align-items: center; margin-bottom: 100;">
+    <h3>Carga de datos manual</h3>
+    <p>Aqui puede cargar manualmente los datos sobre incidencias y fraudes del cliente. <br>Asegúrese de que la importación la realiza en formato CSV
+    y que los campos coinciden.
+    </p>
+    <br>
+    <h4>Incidencias</h4>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ incidencias_form.as_p }}
+        <button type="submit" name="submit_incidencias" class="btn btn-info">Cargar Incidencias</button>
+    </form>
+    <br>
+    
+    <!-- Formulario de carga para fraudes -->
+    <h4>Fraudes</h4>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ fraudes_form.as_p }}
+        <button type="submit" name="submit_fraudes" class="btn btn-warning">Cargar Fraudes</button>
+    </form>
+    </div>
+</div>
+{% endblock %}
