@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit;
 global java.util.List respuestas;
 global java.util.List recomendaciones;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 rule "Fecha de accidente superior a 90 días"
 when
     siniestro: Siniestro(fechaYHora.isBefore(LocalDateTime.now().minusDays(90)))
@@ -16,107 +16,128 @@ then
     respuestas.add("El siniestro ocurrió hace más de 90 días en: " + siniestro.getUbicacion());
     recomendaciones.add("Verificar motivo de notificación tardía del siniestro.");
 end
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
 rule "Confirmar que el siniestro ocurrió en un aparcamiento"
-    when
-        siniestro: Siniestro(tipoAparcamiento == "si")
-    then
-        respuestas.add("El siniestro ocurrió en un aparcamiento en: " + siniestro.getUbicacion());
+when
+    siniestro: Siniestro(tipoAparcamiento == "si")
+then
+    respuestas.add("El siniestro ocurrió en un aparcamiento en: " + siniestro.getUbicacion());
+    recomendaciones.add("Verificar detalles del aparcamiento.");
 end
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
 rule "Testigos presentes"
-    when
-        siniestro: Siniestro(testigo != null && !testigo.isEmpty())
-    then
-        respuestas.add("Testigos presentes: " + siniestro.getTestigo());
-        recomendaciones.add("Contactar al testigo: " + siniestro.getContactoTestigo());
+when
+    siniestro: Siniestro(testigo != null && !testigo.isEmpty())
+then
+    respuestas.add("Testigos presentes: " + siniestro.getTestigo());
+    recomendaciones.add("Contactar al testigo: " + siniestro.getContactoTestigo());
 end
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Regla para identificar reclamaciones frecuentes por un asegurado
+//////////////////////////////////////////////////////
 rule "Reclamaciones frecuentes"
 when
     siniestro: Siniestro(reincidenciaUltimoAnno > 2)
 then
     respuestas.add("Alerta: Reclamaciones frecuentes en un corto período de tiempo.");
+    recomendaciones.add("Investigar posibles patrones de fraude.");
 end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Regla para verificar si hubo llamada a la policía en siniestros con daños significativos
-rule "Llamada a policia en siniestros graves"
+///////////////////////////////////////////////////////////////////
+rule "Llamada a policía en siniestros graves"
 when
     siniestro: Siniestro(llamadaPolicia == "no", vehiculosPropiedadesInvolucrados != null)
 then
     respuestas.add("Verificar: No se reportó llamada a la policía en un siniestro con daños significativos.");
+    recomendaciones.add("Considerar revisión adicional del caso.");
 end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Regla para detectar fraudes basados en el número de reincidencias
+//////////////////////////////////////////////////////////////////////
 rule "Fraude por reincidencia"
 when
     siniestro: Siniestro(reincidencia3Anno >= 3)
 then
     respuestas.add("Alerta de fraude: Reincidencia elevada en los últimos tres años.");
+    recomendaciones.add("Realizar investigación de antecedentes del asegurado.");
 end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Regla para detectar discrepancias entre el daño reportado y la ausencia de testigos o reporte policial
+//////////////////////////////////////////////////////////////////////
 rule "Discrepancias en reporte de daño"
 when
-    siniestro : Siniestro( vehiculosPropiedadesInvolucrados != null, testigo == null, llamadaPolicia == "no" )
+    siniestro : Siniestro(vehiculosPropiedadesInvolucrados != null, testigo == null, llamadaPolicia == "no")
 then
     respuestas.add("Revisión necesaria: Daño significativo reportado sin testigos o reporte policial.");
+    recomendaciones.add("Solicitar aclaraciones adicionales del asegurado.");
 end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Regla para identificar siniestros frecuentes en el mismo vehículo
+////////////////////////////////////////////////////////////////////////////////
 rule "Siniestros frecuentes en el mismo vehículo"
 when
-    siniestro : Siniestro( reincidenciaUltimoAnno >= 2 )
+    siniestro : Siniestro(reincidenciaUltimoAnno >= 2)
 then
     respuestas.add("Revisión de vehículo: Múltiples siniestros reportados para el mismo vehículo.");
+    recomendaciones.add("Verificar historial de mantenimiento del vehículo.");
 end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Regla para priorizar siniestros con heridos
+////////////////////////////////////////////////////////////////////////////////
 rule "Priorizar siniestros con heridos"
 when
-    siniestro: Siniestro(vehiculosPropiedadesInvolucrados == true)
+    siniestro: Siniestro(vehiculosPropiedadesInvolucrados != null)
 then
     respuestas.add("Priorizar este siniestro debido a la posible presencia de heridos.");
+    recomendaciones.add("Asegurar que se han tomado todas las medidas de emergencia necesarias.");
 end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Regla para sugerir revisión rápida si no hay vehículos o propiedades involucradas
+//////////////////////////////////////////////////////////////////////////////////////
 rule "Revisión rápida para siniestros menores"
 when
-    siniestro: Siniestro(vehiculosPropiedadesInvolucrados == false)
+    siniestro: Siniestro(vehiculosPropiedadesInvolucrados == null)
 then
-    respuestas.add("Sugerir revision rapida del caso al no haber vehiculos o propiedades involucradas.");
+    respuestas.add("Sugerir revisión rápida del caso al no haber vehículos o propiedades involucradas.");
+    recomendaciones.add("Finalizar el trámite rápidamente si no hay otros problemas.");
 end
-
+////////////////////////////////////////////////////////////////////////////
 rule "Pérdida de puntos"
-    when
-        siniestro: Siniestro(puntosCarnet != null)
-    then
-        respuestas.add("El siniestro resultó en una pérdida de puntos para el conductor.");
+when
+    siniestro: Siniestro(puntosCarnet < 6)
+then
+    respuestas.add("El conductor tiene menos de 6 puntos en su carnet.");
+    recomendaciones.add("Verificar cumplimiento de las normas de tráfico.");
 end
-
+//////////////////////////////////////////////////////////////////
 rule "Estado de póliza"
-    when
-        siniestro: Siniestro(inicioPoliza.isBefore(LocalDate.now()) && finPoliza.isAfter(LocalDate.now()))
-    then
-        respuestas.add("La póliza del asegurado está activa.");
+when
+    siniestro: Siniestro(inicioPoliza.isBefore(LocalDate.now()) && finPoliza.isAfter(LocalDate.now()))
+then
+    respuestas.add("La póliza del asegurado está activa.");
+    recomendaciones.add("Proceder con la tramitación del siniestro.");
 end
-
+////////////////////////////////////////////////////////////////////////
 rule "Siniestro con daños a propiedades"
-    when
-        siniestro: Siniestro(vehiculosPropiedadesInvolucrados != null && !vehiculosPropiedadesInvolucrados.isEmpty())
-    then
-        respuestas.add("El siniestro causó daños a las siguientes propiedades: " + siniestro.getVehiculosPropiedadesInvolucrados());
+when
+    siniestro: Siniestro(vehiculosPropiedadesInvolucrados != null && !vehiculosPropiedadesInvolucrados.isEmpty())
+then
+    respuestas.add("El siniestro causó daños a las siguientes propiedades: " + siniestro.getVehiculosPropiedadesInvolucrados());
+    recomendaciones.add("Contactar a los propietarios de las propiedades involucradas.");
 end
+//////////////////////////////////////////////////////////////////////////
+rule "Siniestro durante la vigencia de la póliza"
+when
+    siniestro: Siniestro(fechaYHora.isAfter(inicioPoliza.atStartOfDay()) && fechaYHora.isBefore(finPoliza.plusDays(1).atStartOfDay()))
+then
+    respuestas.add("El siniestro ocurrió durante la vigencia de la póliza.");
+end
+//////////////////////////////////////////////////////////////////////////
+rule "Validar información del conductor"
+when
+    siniestro: Siniestro(edadConductor < 18 || anosCarnet < 1)
+then
+    respuestas.add("Verificar información del conductor: Edad o años con carnet fuera de rango.");
+end
+////////////////////////////////////////////////////////////////////////
+rule "Comprobar cobertura de la póliza"
+when
+    siniestro: Siniestro(tipoCobertura == "terceros" && vehiculosPropiedadesInvolucrados != null)
+then
+    respuestas.add("Verificar cobertura: La póliza es de terceros y hay propiedades involucradas.");
+end
+//////////////////////////////////////////////////////////////////////
+rule "Evaluar el importe de la póliza"
+when
+    siniestro: Siniestro(importePoliza < 500)
+then
+    respuestas.add("El importe de la póliza es bajo, considerar una revisión detallada.");
+end
+//////////////////////////////////////////////////////////////////////
