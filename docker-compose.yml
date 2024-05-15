@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  django:
+    build:
+      context: ./autoaid
+      dockerfile: Dockerfile
+    container_name: django_app
+    volumes:
+      - ./autoaid:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - drools
+
+  drools:
+    build:
+      context: ./drools/DroolsProject
+      dockerfile: Dockerfile
+    container_name: drools_app
+    ports:
+      - "8080:8080"
