@@ -93,15 +93,15 @@ class HistorialIncidencia(models.Model):
     contacto_testigo = models.CharField(max_length=100, verbose_name='Contacto del testigo', null=True, blank=True)
 
 class Poliza(models.Model):
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Usuario")
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Usuario")
     tipo_poliza = models.CharField(max_length=50, verbose_name="Tipo de Póliza")
     fecha_inicio = models.DateField(verbose_name="Fecha de Inicio")
     fecha_fin = models.DateField(verbose_name="Fecha de Fin")
     condiciones = models.TextField(verbose_name="Condiciones de la Póliza", blank=True, null=True)
-    edad_conductor = models.IntegerField(verbose_name="Edad del Conductor")
-    anos_carnet = models.IntegerField(verbose_name="Años de Carnet")
-    puntos_carnet = models.IntegerField(verbose_name="Puntos del Carnet")
-    importe_poliza = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Importe de la Póliza")
+    edad_conductor = models.IntegerField(verbose_name="Edad del Conductor", default=0)
+    anos_carnet = models.IntegerField(verbose_name="Años de Carnet", default=0)
+    puntos_carnet = models.IntegerField(verbose_name="Puntos del Carnet", default=0)
+    importe_poliza = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Importe de la Póliza", default=0)
 
 
     def __str__(self):

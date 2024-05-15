@@ -25,36 +25,42 @@
   </head>
   <body>
     
-  <header class="ds-header ds-header-home">
-    <div class="container">
-        <div class="ds-header-inner">
-          <a href="index.html" class="ds-logo">autoAID<span>.</span></a>
-          <p>¡Bienvenido, {{ user.nombre }} !  <a href="{% url 'logout' %}" style="color: red; font-size: small;">Cerrar sesión</a></p>
+    <header class="ds-header ds-header-home">
+        <div class="container">
+            <div class="ds-header-inner">
+              <a href="/home" class="ds-logo">autoAID<span>.</span></a>
+              <div style="align-items:center;">
+              <p>
+              ¡Bienvenido, {{ user.nombre }} ! <a href="{% url 'edit_profile' %}" style="color: green; font-size: small;">Mi Perfil</a>
+              <a href="{% url 'logout' %}" style="color: red; font-size: small;">Cerrar sesión</a></p>
+              </div>
+            </div>
         </div>
-    </div>
-    <!-- Botones basados en el rol de usuario -->
-  <div class="container mt-4">
-    
-      {% if user.rol == 'worker' %}
-          <!-- Botón para workers -->
-      <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
-      {% endif %}
+        <!-- Botones basados en el rol de usuario -->
+      <div class="container mt-4">
+          {% if user.rol == 'worker' %}
+              <!-- Botón para workers -->
+          <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+          <a href="{% url 'historial_usuario' %}" class="btn btn-primary" style="background-color: orange; border-color: orange;">Historial Usuarios</a>
+          <a href="{% url 'gestion_poliza' %}" class="btn btn-primary" style="background-color: #ab63ca; border-color: #ab63ca;">Gestión poliza</a>
+          {% endif %}
 
-      {% if user.rol == 'usuario' %}
-          <!-- Botón para usuarios -->
-      <a href="{% url 'vehicle_visualization:car' %}" class="btn btn-primary">Incidencia</a>
-      {% endif %}
+          {% if user.rol == 'usuario' %}
+              <!-- Botón para usuarios -->
+          <a href="{% url 'vehicle_visualization:car_view' %}" class="btn btn-success">Nueva incidencia</a>
+          <a href="{% url 'vehicle_visualization:mis_incidencias' %}" class="btn btn-primary">Mis incidencias</a>
 
-      {% if user.is_superuser %}
-          <!-- Botón para superusuarios -->
-      <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
-          <!-- Superuser también puede ver el dashboard -->
-      <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
-      <a href="{% url 'historial_usuario' %}" class="btn btn-primary" style="background-color: orange; border-color: orange;">Historial Usuarios</a>
-      <a href="{% url 'home' %}" class="btn btn-success">Home</a>
-      {% endif %}
-</div>
+          {% endif %}
 
+          {% if user.is_superuser %}
+              <!-- Botón para superusuarios -->
+          <a href="{% url 'manage_users' %}" class="btn btn-danger">Permisos usuarios</a>
+              <!-- Superuser también puede ver el dashboard -->
+          <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+          <a href="{% url 'historial_usuario' %}" class="btn btn-primary" style="background-color: orange; border-color: orange;">Historial Usuarios</a>
+          <a href="{% url 'gestion_poliza' %}" class="btn btn-primary" style="background-color: #ab63ca; border-color: #ab63ca;">Gestión poliza</a>
+          {% endif %}
+  </div>
 </header>
 {% block content %}
 <div class="container mt-4">
@@ -64,35 +70,93 @@
             <h5 class="card-title">{{ incidencia.marca_modelo }}</h5>
             <h6 class="card-subtitle mb-2 text-muted">Matrícula: {{ incidencia.matricula }}</h6>
             <p class="card-text">{{ incidencia.descripcion }}</p>
-            <!-- Agrega más campos de detalles como sea necesario -->
-            <!-- Imagenes -->
+            <!-- Detalles adicionales de la incidencia -->
+            <p class="card-text">Ubicación del Siniestro: {{ incidencia.ubicacion_siniestro }}</p>
+            <p class="card-text">Fecha del Siniestro: {{ incidencia.fecha_hora_siniestro }}</p>
+            <p class="card-text">Estado: {{ incidencia.estado }}</p>
+            <p class="card-text">Nivel de Daño en el Capó: {{ incidencia.nivel_dano_capo }}</p>
+            <p class="card-text">Nivel de Daño en el Paragolpes: {{ incidencia.nivel_dano_paragolpes }}</p>
+            <p class="card-text">Nivel de Daño Lateral Izquierdo: {{ incidencia.nivel_dano_lateral_izq }}</p>
+            <p class="card-text">Nivel de Daño Lateral Derecho: {{ incidencia.nivel_dano_lateral_der }}</p>
+            <p class="card-text">Nivel de Daño en el Techo: {{ incidencia.nivel_dano_techo }}</p>
+            <p class="card-text">Nivel de Daño en la Parte Trasera: {{ incidencia.nivel_dano_atras }}</p>
+
+            <!-- Imágenes -->
             {% if incidencia.imagen_capo %}
             <div>
                 <h5>Imagen del Capó</h5>
                 <img src="{{ incidencia.imagen_capo.url }}" alt="Imagen del Capó" class="img-fluid">
             </div>
             {% endif %}
-            <!-- Repetir para otras imágenes y campos -->
+            {% if incidencia.imagen_paragolpes %}
+            <div>
+                <h5>Imagen del Paragolpes</h5>
+                <img src="{{ incidencia.imagen_paragolpes.url }}" alt="Imagen del Paragolpes" class="img-fluid">
+            </div>
+            {% endif %}
+            {% if incidencia.imagen_lateral_izq %}
+            <div>
+                <h5>Imagen Lateral Izquierda</h5>
+                <img src="{{ incidencia.imagen_lateral_izq.url }}" alt="Imagen Lateral Izquierda" class="img-fluid">
+            </div>
+            {% endif %}
+            {% if incidencia.imagen_lateral_der %}
+            <div>
+                <h5>Imagen Lateral Derecha</h5>
+                <img src="{{ incidencia.imagen_lateral_der.url }}" alt="Imagen Lateral Derecha" class="img-fluid">
+            </div>
+            {% endif %}
+            {% if incidencia.imagen_techo %}
+            <div>
+                <h5>Imagen del Techo</h5>
+                <img src="{{ incidencia.imagen_techo.url }}" alt="Imagen del Techo" class="img-fluid">
+            </div>
+            {% endif %}
+            {% if incidencia.imagen_atras %}
+            <div>
+                <h5>Imagen de la Parte Trasera</h5>
+                <img src="{{ incidencia.imagen_atras.url }}" alt="Imagen de la Parte Trasera" class="img-fluid">
+            </div>
+            {% endif %}
         </div>
     </div>
-    <!-- Aquí puedes incluir un botón de regreso o acciones adicionales -->
-    <button id="enviarDrools" class="btn btn-primary">Enviar Datos</button>
-    <a href="{% url 'vehicle_visualization:ver_analisis_drools' incidencia.id %}" class="btn btn-primary">Ver Análisis</a>
-
+    <!-- Botones adicionales -->
+    <button id="enviarDrools" class="btn btn-primary mt-3">Enviar Datos</button>
+    <a href="{% url 'vehicle_visualization:ver_analisis_drools' incidencia.id %}" class="btn btn-primary mt-3">Ver Análisis</a>
+    <button id="eliminarIncidencia" class="btn btn-danger mt-3">Eliminar Incidencia</button>
 </div>
+
+<script>
+    document.getElementById('eliminarIncidencia').addEventListener('click', function() {
+        if (confirm('¿Estás seguro de que deseas eliminar esta incidencia? Esta acción no se puede deshacer.')) {
+            window.location.href = "{% url 'vehicle_visualization:eliminar_incidencia' incidencia.id %}";
+        }
+    });
+</script>
 {% block javascript %}
 <script>
 function enviarDatosDrools() {
     var datosIncidencia = {
         "ubicacion": "{{ incidencia.ubicacion_siniestro }}",
-        // "fechaYHora": "{{ incidencia.fecha_hora_siniestro}}",
+        "fechaYHora": "{{ incidencia.fecha_hora_siniestro|date:'Y-m-d\TH:i:s' }}",
         "tipoAparcamiento": "{{ incidencia.tipo_aparcamiento}}",
         "llamadaPolicia": "{{ incidencia.llamada_policia}}",
         "matricula": "{{ incidencia.matricula}}",
         "numeroIncidenciaPolicial": "{{ incidencia.numero_incidencia_policial}}",
         "testigo": "{{ incidencia.testigo}}",
         "contactoTestigo": "{{ incidencia.contacto_testigo}}",
-        "vehiculosPropiedadesInvolucrados": "{{ incidencia.vehiculos_propiedades_involucrados}}"
+        "vehiculosPropiedadesInvolucrados": "{{ incidencia.vehiculos_propiedades_involucrados}}",
+        "reincidenciaUltimoAnno": "{{ historial_incidencias_count }}",
+        "reincidencia3Anno": "{{ historial_incidencias_count }}",  // Asumiendo similar al anterior
+        "fraudes": "{{ historial_fraudes_count }}",
+        "tipoCobertura": "{{ poliza.tipo_poliza }}",
+        "inicioPoliza": "{{ poliza.fecha_inicio|date:'Y-m-d' }}",
+        "finPoliza": "{{ poliza.fecha_fin|date:'Y-m-d'}}",
+        "edadConductor": "{{ poliza.edad_conductor }}",
+        "anosCarnet": "{{ poliza.anos_carnet }}",
+        "importePoliza": "{{ poliza.importe_poliza }}",
+        "puntosCarnet": "{{ poliza.puntos_carnet }}",
+
     };
 
     // Realizar la petición POST a Drools

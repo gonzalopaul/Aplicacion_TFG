@@ -8,10 +8,16 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import IncidenciaRevisada
+from .models import IncidenciaRevisada, HistorialFraudes, Poliza, HistorialIncidencia
 from django.utils.decorators import method_decorator
 from django.views import View
-
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, KeepTogether
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from django.http import HttpResponse
+import os
+from django.conf import settings
 
 
 # Create your views here.
@@ -130,15 +136,17 @@ def dashboard_incidencias(request):
 def detalle_incidencia(request, pk):
     # Recuperar la incidencia por el ID primario 'pk'
     incidencia = get_object_or_404(Incidencia, pk=pk)
-    # Calcular el número de entradas en HistorialFraudes para el usuario relacionado con la incidencia
-    conteo_fraudes = HistorialFraudes.objects.filter(usuario=incidencia.usuario).count()
+    usuario = incidencia.usuario
+    historial_incidencias_count = HistorialIncidencia.objects.filter(usuario=usuario).count()
+    historial_fraudes_count = HistorialFraudes.objects.filter(usuario=usuario).count()
+    poliza = Poliza.objects.get(usuario=usuario)
 
-    # Pasar la incidencia y el conteo de fraudes al template
     context = {
         'incidencia': incidencia,
-        'conteo_fraudes': conteo_fraudes,
+        'historial_incidencias_count': historial_incidencias_count,
+        'historial_fraudes_count': historial_fraudes_count,
+        'poliza': poliza
     }
-    
     # Aquí puedes añadir cualquier lógica adicional que necesites, por ejemplo:
     # - Verificar si el usuario tiene permiso para ver esta incidencia
     # - Realizar alguna operación basada en la incidencia
@@ -240,3 +248,97 @@ def ver_analisis_drools(request, incidencia_id):
         'incidencia_id': incidencia_id,
         'form': form
     })
+
+logo_path = os.path.join(settings.BASE_DIR, 'autoaid/static', 'images/logo2.png')
+
+def descargar_pdf(request, incidencia_id):
+    # Obtener la incidencia por ID
+    incidencia = Incidencia.objects.get(id=incidencia_id)
+    
+    # Crear una respuesta HTTP de tipo PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="incidencia_{incidencia_id}.pdf"'
+
+    # Configuración del documento PDF
+    buffer = []
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    styles = getSampleStyleSheet()
+    
+    # Título del informe
+    report_title = Paragraph(f"Informe de Incidencia - {incidencia.marca_modelo}", styles['Title'])
+    buffer.append(report_title)
+    buffer.append(Spacer(1, 0.25 * inch))
+
+    # Logo de la empresa
+    logo = Image(logo_path)
+    logo.width = inch * 1.5
+    logo.height = inch
+    buffer.append(logo)
+    buffer.append(Spacer(1, 0.25 * inch))
+
+    # Agregando detalles de la incidencia en una tabla
+    data = [
+        ["Campo", "Detalle"],
+        ["Marca y Modelo", incidencia.marca_modelo],
+        ["Fecha del Siniestro", incidencia.fecha_hora_siniestro.strftime('%Y-%m-%d %H:%M')],
+        ["Ubicación del Siniestro", incidencia.ubicacion_siniestro],
+        ["Matrícula", incidencia.matricula],
+        ["Descripción", incidencia.descripcion],
+        ["Estado", incidencia.estado],
+        # Agrega más campos según necesites
+    ]
+
+    table = Table(data, colWidths=[2 * inch, 4 * inch])
+    table.setStyle(TableStyle([
+       ('BACKGROUND', (0, 0), (-1, 0), '#CCCCCC'),
+       ('GRID', (0, 0), (-1, -1), 1, 'black'),
+       ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+       ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+    ]))
+    buffer.append(table)
+    buffer.append(Spacer(1, 0.5 * inch))
+
+    # Añadir imágenes de daños si están presentes
+    image_fields = [
+        ('imagen_capo', 'Daño en el Capó'),
+        ('imagen_paragolpes', 'Daño en el Paragolpes'),
+        ('imagen_lateral_izq', 'Daño Lateral Izquierdo'),
+        ('imagen_lateral_der', 'Daño Lateral Derecho'),
+        ('imagen_techo', 'Daño en el Techo'),
+        ('imagen_atras', 'Daño en la Parte Trasera')
+    ]
+    
+    images_data = []
+    for field_name, description in image_fields:
+        image = getattr(incidencia, field_name)
+        if image:
+            image_path = os.path.join(settings.MEDIA_ROOT, image.name)
+            img = Image(image_path)
+            img.drawHeight = 1.5 * inch
+            img.drawWidth = 1.5 * inch
+            images_data.append([description, img])
+    
+    if images_data:
+        image_table = Table(images_data, colWidths=[2 * inch, 4 * inch])
+        image_table.setStyle(TableStyle([
+            ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')
+        ]))
+        buffer.append(KeepTogether(image_table))
+        buffer.append(Spacer(1, 0.5 * inch))
+
+    # Añadir mensaje final
+    final_message = Paragraph("Muchas gracias por confiar en nosotros. Un agente se pondrá en contacto con usted en 24-48 horas.", styles['Normal'])
+    buffer.append(final_message)
+
+    # Construir el PDF
+    doc.build(buffer)
+    return response
+
+@login_required
+def eliminar_incidencia(request, incidencia_id):
+    incidencia = get_object_or_404(Incidencia, id=incidencia_id)
+    if request.method == 'GET':
+        incidencia.delete()
+        messages.success(request, 'La incidencia ha sido eliminada con éxito.')
+        return redirect('/dashboard')

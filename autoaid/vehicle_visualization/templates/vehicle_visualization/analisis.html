@@ -24,32 +24,39 @@
   <header class="ds-header ds-header-home">
     <div class="container">
         <div class="ds-header-inner">
-          <a href="index.html" class="ds-logo">autoAID<span>.</span></a>
-          <p>¡Bienvenido, {{ user.nombre }} !  <a href="{% url 'logout' %}" style="color: red; font-size: small;">Cerrar sesión</a></p>
+          <a href="/home" class="ds-logo">autoAID<span>.</span></a>
+          <div style="align-items:center;">
+          <p>
+          ¡Bienvenido, {{ user.nombre }} ! <a href="{% url 'edit_profile' %}" style="color: green; font-size: small;">Mi Perfil</a>
+          <a href="{% url 'logout' %}" style="color: red; font-size: small;">Cerrar sesión</a></p>
+          </div>
         </div>
     </div>
     <!-- Botones basados en el rol de usuario -->
   <div class="container mt-4">
-    
       {% if user.rol == 'worker' %}
           <!-- Botón para workers -->
       <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
+      <a href="{% url 'historial_usuario' %}" class="btn btn-primary" style="background-color: orange; border-color: orange;">Historial Usuarios</a>
+      <a href="{% url 'gestion_poliza' %}" class="btn btn-primary" style="background-color: #ab63ca; border-color: #ab63ca;">Gestión poliza</a>
       {% endif %}
 
       {% if user.rol == 'usuario' %}
           <!-- Botón para usuarios -->
-      <a href="{% url 'vehicle_visualization:car_view' %}" class="btn btn-primary">Incidencia</a>
+      <a href="{% url 'vehicle_visualization:car_view' %}" class="btn btn-success">Nueva incidencia</a>
+      <a href="{% url 'vehicle_visualization:mis_incidencias' %}" class="btn btn-primary" style="background-color: aquamarine; border-color: aquamarine;">Mis incidencias</a>
+
       {% endif %}
 
       {% if user.is_superuser %}
           <!-- Botón para superusuarios -->
-      <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
+      <a href="{% url 'manage_users' %}" class="btn btn-danger">Permisos usuarios</a>
           <!-- Superuser también puede ver el dashboard -->
       <a href="{% url 'vehicle_visualization:dashboard_incidencias' %}" class="btn btn-primary">Dashboard</a>
-      <a href="{% url 'home' %}" class="btn btn-success">Home</a>
+      <a href="{% url 'historial_usuario' %}" class="btn btn-primary" style="background-color: orange; border-color: orange;">Historial Usuarios</a>
+      <a href="{% url 'gestion_poliza' %}" class="btn btn-primary" style="background-color: #ab63ca; border-color: #ab63ca;">Gestión poliza</a>
       {% endif %}
 </div>
-
 </header>
 <div style="margin-left: 150; margin-right: 150;">
 {% block content %}

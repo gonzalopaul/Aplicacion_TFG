@@ -10,7 +10,7 @@ public class Siniestro {
     private String llamadaPolicia;
     private String matricula;
     private String numeroIncidenciaPolicial;
-    private String testigo; // Puedes usar null para indicar la ausencia de testigos
+    private String testigo;
     private String contactoTestigo;
     private String vehiculosPropiedadesInvolucrados;
     private int reincidenciaUltimoAnno;

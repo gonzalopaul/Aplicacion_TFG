@@ -17,4 +17,6 @@ urlpatterns = [
     path('mis-incidencias/', views.mis_incidencias, name='mis_incidencias'),
     path('procesar-respuesta-drools/', views.ProcesarRespuestaDroolsView.as_view(), name='procesar_respuesta_drools'),
     path('incidencia/<int:incidencia_id>/analisis/', views.ver_analisis_drools, name='ver_analisis_drools'),
+    path('descargar_pdf/<int:incidencia_id>/', views.descargar_pdf, name='descarga_pdf'),
+    path('eliminar_incidencia/<int:incidencia_id>/', views.eliminar_incidencia, name='eliminar_incidencia'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

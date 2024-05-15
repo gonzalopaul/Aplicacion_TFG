@@ -40,6 +40,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.13.0</version> 
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.13.0</version> <!-- Usa la versión que sea compatible con tu versión actual de Jackson -->
+        </dependency>
   </dependencies>
   <build>
     <plugins>

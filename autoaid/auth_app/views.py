@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from .models import CustomUser
 from vehicle_visualization.models import *
 import csv
+from datetime import date, timedelta
+from django.contrib import messages
 
 # def login_view(request):
 #     if request.method == 'POST':
@@ -173,3 +175,64 @@ def handle_csv_incidencias(csv_file, usuario):
         cleaned_row.setdefault('descripcion', '')
         incidencias.append(HistorialIncidencia(**cleaned_row))
     HistorialIncidencia.objects.bulk_create(incidencias)
+
+@user_passes_test(lambda u: u.is_superuser or u.rol == "worker")
+def gestion_poliza(request):
+    usuario_form = UsuarioFiltroForm(request.GET or None)
+    poliza_form = None
+    usuario = None
+
+    # Recuperar el usuario desde el formulario o la URL
+    if 'usuario' in request.GET and usuario_form.is_valid():
+        usuario = usuario_form.cleaned_data['usuario']
+        poliza, created = Poliza.objects.get_or_create(
+            usuario=usuario,
+            defaults={
+                'fecha_inicio': date.today(),
+                'fecha_fin': date.today() + timedelta(days=365),
+                'tipo_poliza': "Básica",
+                'condiciones': "Condiciones predeterminadas",
+                'edad_conductor': 25,
+                'anos_carnet': 5,
+                'puntos_carnet': 12,
+                'importe_poliza': 100.00
+            }
+        )
+        poliza_form = PolizaForm(instance=poliza)
+
+    # Procesar POST para actualizar o crear póliza
+    if request.method == 'POST':
+        if usuario:
+            poliza = Poliza.objects.get(usuario=usuario)  # Asegúrate de que esta línea no falla
+            poliza_form = PolizaForm(request.POST, instance=poliza)
+            if poliza_form.is_valid():
+                poliza_form.save()
+                return redirect('gestion_poliza')
+        else:
+            return redirect('gestion_poliza')  # Redirect si no hay usuario seleccionado o en caso de error
+
+    return render(request, 'auth_app/gestion_poliza.html', {
+        'usuario_form': usuario_form,
+        'poliza_form': poliza_form
+    })
+
+@login_required
+def edit_user_profile(request):
+    if request.method == 'POST':
+        form = CustomUserEditForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('home')  # Redirige a la página del perfil
+    else:
+        form = CustomUserEditForm(instance=request.user)
+    return render(request, 'auth_app/edit_profile.html', {'form': form})
+
+@login_required
+def delete_user(request):
+    if request.method == 'POST':
+        user = request.user
+        user.delete()  # Elimina el usuario
+        logout(request)  # Cierra la sesión del usuario
+        messages.success(request, 'Su cuenta ha sido eliminada.')
+        return redirect('login')  # Redirige a la página de inicio o a donde consideres adecuado
+    return render(request, 'auth_app/confirm_delete.html')

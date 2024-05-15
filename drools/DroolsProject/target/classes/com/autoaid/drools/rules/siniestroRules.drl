@@ -2,34 +2,40 @@ package com.autoaid.drools.rules;
 
 import com.autoaid.drools.Siniestro;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 global java.util.List respuestas;
 global java.util.List recomendaciones;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-rule "Identificar tipo de aparcamiento"
+rule "Fecha de accidente superior a 90 días"
 when
-    siniestro: Siniestro(tipoAparcamiento == "no")
+    siniestro: Siniestro(fechaYHora.isBefore(LocalDateTime.now().minusDays(90)))
 then
-    respuestas.add("Siniestro de no aparcamiento detectado: " + siniestro.getUbicacion());
+    respuestas.add("El siniestro ocurrió hace más de 90 días en: " + siniestro.getUbicacion());
+    recomendaciones.add("Verificar motivo de notificación tardía del siniestro.");
 end
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-rule "Identificar matricula de tipo aparcamiento"
-when
-    siniestro: Siniestro(tipoAparcamiento == "no")
-then
-    respuestas.add("Matricula del vehiculo: " + siniestro.getMatricula());
-end
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-rule "Necesita aclaracion"
-when
-    siniestro: Siniestro(testigo != null)
-then
-    recomendaciones.add("Contactar con testigo " + siniestro.getTestigo() + " al " + siniestro.getContactoTestigo());
+rule "Confirmar que el siniestro ocurrió en un aparcamiento"
+    when
+        siniestro: Siniestro(tipoAparcamiento == "si")
+    then
+        respuestas.add("El siniestro ocurrió en un aparcamiento en: " + siniestro.getUbicacion());
 end
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+rule "Testigos presentes"
+    when
+        siniestro: Siniestro(testigo != null && !testigo.isEmpty())
+    then
+        respuestas.add("Testigos presentes: " + siniestro.getTestigo());
+        recomendaciones.add("Contactar al testigo: " + siniestro.getContactoTestigo());
+end
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Regla para identificar reclamaciones frecuentes por un asegurado
@@ -44,7 +50,7 @@ end
 // Regla para verificar si hubo llamada a la policía en siniestros con daños significativos
 rule "Llamada a policia en siniestros graves"
 when
-    siniestro: Siniestro(llamadaPolicia == false, vehiculosPropiedadesInvolucrados == true)
+    siniestro: Siniestro(llamadaPolicia == "no", vehiculosPropiedadesInvolucrados != null)
 then
     respuestas.add("Verificar: No se reportó llamada a la policía en un siniestro con daños significativos.");
 end
@@ -62,7 +68,7 @@ end
 // Regla para detectar discrepancias entre el daño reportado y la ausencia de testigos o reporte policial
 rule "Discrepancias en reporte de daño"
 when
-    siniestro : Siniestro( vehiculosPropiedadesInvolucrados == true, testigo == null, llamadaPolicia == false )
+    siniestro : Siniestro( vehiculosPropiedadesInvolucrados != null, testigo == null, llamadaPolicia == "no" )
 then
     respuestas.add("Revisión necesaria: Daño significativo reportado sin testigos o reporte policial.");
 end
@@ -94,3 +100,23 @@ then
     respuestas.add("Sugerir revision rapida del caso al no haber vehiculos o propiedades involucradas.");
 end
 
+rule "Pérdida de puntos"
+    when
+        siniestro: Siniestro(puntosCarnet != null)
+    then
+        respuestas.add("El siniestro resultó en una pérdida de puntos para el conductor.");
+end
+
+rule "Estado de póliza"
+    when
+        siniestro: Siniestro(inicioPoliza.isBefore(LocalDate.now()) && finPoliza.isAfter(LocalDate.now()))
+    then
+        respuestas.add("La póliza del asegurado está activa.");
+end
+
+rule "Siniestro con daños a propiedades"
+    when
+        siniestro: Siniestro(vehiculosPropiedadesInvolucrados != null && !vehiculosPropiedadesInvolucrados.isEmpty())
+    then
+        respuestas.add("El siniestro causó daños a las siguientes propiedades: " + siniestro.getVehiculosPropiedadesInvolucrados());
+end

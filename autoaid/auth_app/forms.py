@@ -1,10 +1,17 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
+from vehicle_visualization.models import Poliza
+from django.contrib.auth import get_user_model
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
+        fields = ['nombre', 'apellidos', 'email']
+
+class CustomUserEditForm(forms.ModelForm):
+    class Meta:
+        model = get_user_model()
         fields = ['nombre', 'apellidos', 'email']
 
 class CustomUserForm(forms.Form):
@@ -35,3 +42,12 @@ class HistorialIncidenciasCSVForm(forms.Form):
 
 class HistorialFraudesCSVForm(forms.Form):
     fraudes_csv = forms.FileField(label='Cargar CSV de Fraudes', help_text='Archivo CSV', widget=forms.FileInput(attrs={'accept': '.csv'}))
+
+class PolizaForm(forms.ModelForm):
+    class Meta:
+        model = Poliza
+        fields = ['tipo_poliza', 'fecha_inicio', 'fecha_fin', 'condiciones', 'edad_conductor', 'anos_carnet', 'puntos_carnet', 'importe_poliza']
+
+    def __init__(self, *args, **kwargs):
+        super(PolizaForm, self).__init__(*args, **kwargs)
+        # Puedes añadir personalizaciones adicionales aquí si es necesario
