@@ -1,0 +1,39 @@
+# Entorno virtual de Python
+venv/
+ENV/
+env/
+tfg_env/
+/tfg_env
+tfg_env
+.venv/
+env.bak/
+venv.bak/
+
+# Archivos compilados de Python
+*.py[cod]
+__pycache__/
+*.so
+
+# Archivos de configuración sensible
+*.env
+.env.*
+settings.py
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Configuraciones de IDE/editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de Docker
+docker-compose.override.yml
+
+# Archivos y directorios generados
+media/
+static/
+migrations/
+
