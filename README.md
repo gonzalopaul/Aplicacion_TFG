@@ -1,13 +1,14 @@
 
 # TRABAJO FIN DE GRADO
 
-![Logo](https://ibb.co/Y09krrm)
+[![logo2.png](https://i.postimg.cc/SRjL7BrZ/logo2.png)](https://postimg.cc/WqLJsfxr)
 
 Aplicación para la gestión de siniestros de vehículos
 
  [EN] Vehicle Claims Management App
 
 ## Información del proyecto
+
 Este proyecto consiste en una aplicación web para la gestión de siniestros de vehículos. Los usuarios pueden registrarse y, una vez validados por un administrador, reportar incidencias detalladas mediante un modelo 3D interactivo. La aplicación distingue entre roles de usuario (asegurado), trabajador de la aseguradora y administrador, ofreciendo funcionalidades específicas para cada uno. Los trabajadores pueden revisar, analizar y gestionar incidencias con el apoyo de Drools, un motor de reglas que automatiza el análisis y la detección de fraudes. Los administradores, además, pueden asignar roles y permisos a los usuarios. El despliegue se realiza mediante Docker, facilitando la instalación y ejecución de la aplicación. La integración con Drools se maneja a través de una API, permitiendo un análisis eficiente de los siniestros reportados.
 
 ## Información de despliegue
